@@ -1,0 +1,108 @@
+generator dbml {
+    provider = "prisma-dbml-generator"
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id           String    @id @default(cuid())
+    firstName    String
+    lastName     String
+    email        String    @unique
+    password     String
+    role         Role      @default(USER)
+    ads          Ad[]
+    messages     Message[]
+    ownerChats   Chat[]    @relation("OwnerChats")
+    createdChats Chat[]    @relation("CreatedChats")
+    createdAt    DateTime  @default(now())
+}
+
+model Ad {
+    id          String        @id @default(cuid())
+    title       String
+    description String
+    negotiable  Boolean
+    categoty    Category      @relation(fields: [categoryId], references: [id])
+    categoryId  String
+    price       Int
+    condition   ItemCondition @relation(fields: [conditionId], references: [id])
+    conditionId String
+    contactData ContactData?
+    user        User          @relation(fields: [userId], references: [id])
+    userId      String
+    chats       Chat[]
+    views       Int           @default(0)
+    parameters  Parameter[]
+    createdAt   DateTime      @default(now())
+}
+
+model ContactData {
+    id        String @id @default(cuid())
+    firstName String
+    lastName  String
+    email     String
+    phone     String
+    ad        Ad     @relation(fields: [adId], references: [id])
+    adId      String @unique
+}
+
+model Chat {
+    id        String    @id @default(cuid())
+    ad        Ad        @relation(fields: [adId], references: [id])
+    adId      String
+    creator   User      @relation("CreatedChats", fields: [creatorId], references: [id])
+    creatorId String
+    owner     User      @relation("OwnerChats", fields: [ownerId], references: [id])
+    ownerId   String
+    messages  Message[]
+    createdAt DateTime  @default(now())
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    chat      Chat     @relation(fields: [chatId], references: [id])
+    chatId    String
+    sender    User     @relation(fields: [senderId], references: [id])
+    senderId  String
+    content   String
+    createdAt DateTime @default(now())
+}
+
+model Category {
+    id         String      @id @default(cuid())
+    name       String
+    ads        Ad[]
+    children   Category[]  @relation("SubCategory")
+    parentId   String?
+    parent     Category?   @relation("SubCategory", fields: [parentId], references: [id])
+    parameters Parameter[]
+}
+
+model Parameter {
+    id         String    @id @default(cuid())
+    name       String
+    options    String[]
+    category   Category? @relation(fields: [categoryId], references: [id])
+    categoryId String?
+    ad         Ad?       @relation(fields: [adId], references: [id])
+    adId       String?
+}
+
+model ItemCondition {
+    id   String @id @default(cuid())
+    name String
+    ads  Ad[]
+}
+
+enum Role {
+    USER
+    ADMIN
+}

@@ -1,0 +1,123 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  firstName String [not null]
+  lastName String [not null]
+  email String [unique, not null]
+  password String [not null]
+  role Role [not null, default: 'USER']
+  ads Ad [not null]
+  messages Message [not null]
+  ownerChats Chat [not null]
+  createdChats Chat [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Ad {
+  id String [pk]
+  title String [not null]
+  description String [not null]
+  negotiable Boolean [not null]
+  categoty Category [not null]
+  categoryId String [not null]
+  price Int [not null]
+  condition ItemCondition [not null]
+  conditionId String [not null]
+  contactData ContactData
+  user User [not null]
+  userId String [not null]
+  chats Chat [not null]
+  views Int [not null, default: 0]
+  parameters Parameter [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table ContactData {
+  id String [pk]
+  firstName String [not null]
+  lastName String [not null]
+  email String [not null]
+  phone String [not null]
+  ad Ad [not null]
+  adId String [unique, not null]
+}
+
+Table Chat {
+  id String [pk]
+  ad Ad [not null]
+  adId String [not null]
+  creator User [not null]
+  creatorId String [not null]
+  owner User [not null]
+  ownerId String [not null]
+  messages Message [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Message {
+  id String [pk]
+  chat Chat [not null]
+  chatId String [not null]
+  sender User [not null]
+  senderId String [not null]
+  content String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Category {
+  id String [pk]
+  name String [not null]
+  ads Ad [not null]
+  children Category [not null]
+  parentId String
+  parent Category
+  parameters Parameter [not null]
+}
+
+Table Parameter {
+  id String [pk]
+  name String [not null]
+  options String[] [not null]
+  category Category
+  categoryId String
+  ad Ad
+  adId String
+}
+
+Table ItemCondition {
+  id String [pk]
+  name String [not null]
+  ads Ad [not null]
+}
+
+Enum Role {
+  USER
+  ADMIN
+}
+
+Ref: Ad.categoryId > Category.id
+
+Ref: Ad.conditionId > ItemCondition.id
+
+Ref: Ad.userId > User.id
+
+Ref: ContactData.adId - Ad.id
+
+Ref: Chat.adId > Ad.id
+
+Ref: Chat.creatorId > User.id
+
+Ref: Chat.ownerId > User.id
+
+Ref: Message.chatId > Chat.id
+
+Ref: Message.senderId > User.id
+
+Ref: Category.parentId > Category.id
+
+Ref: Parameter.categoryId > Category.id
+
+Ref: Parameter.adId > Ad.id
